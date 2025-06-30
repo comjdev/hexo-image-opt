@@ -1,0 +1,72 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+---
+description: Guidelines for Hexo plugin development and general Hexo project structure.
+globs:
+  - 'source/**/*.md'
+  - 'themes/**/*.ejs'
+  - 'scripts/**/*.js'
+  - 'layout/**/*.pug'
+alwaysApply: false # Set to true if you want this rule to always be active for the project
+---
+
+# Hexo Project Best Practices
+
+## General Guidelines:
+
+* **Maintain Hexo's Folder Structure:** Stick to the standard `source`, `themes`, `scaffolds`, `public`, `scripts` directories. Do not introduce new top-level directories unless absolutely necessary and documented.
+* **Configuration Files:** Ensure `_config.yml` is well-commented and organized. For theme-specific configurations, use `_config.<theme_name>.yml`.
+* **Markdown for Content:** All post and page content should be in Markdown (`.md`).
+* **Naming Conventions:** Use kebab-case for file and directory names (e.g., `my-new-post.md`, `my-custom-theme`).
+
+## Hexo Plugin Development (`scripts/index.js` or similar):
+
+* **No `module.exports` or Wrapper Functions:** When working on Hexo plugins, **do not use `module.exports = function(hexo) { ... }` or wrap your main logic in a function that's then exported.**
+    * **The `hexo` object will be available directly** in `index.js` (or any file registered as a Hexo script). You can directly access `hexo.extend`, `hexo.log`, etc.
+    * Example:
+        ```javascript
+        // Correct way for Hexo plugin scripts
+        hexo.extend.filter.register('after_post_render', function(data) {
+          // Your plugin logic here
+          return data;
+        });
+
+        hexo.log.info('My custom Hexo plugin loaded!');
+        ```
+* **Module System: Use CommonJS, Not ES6 Modules.**
+    * **Hexo does not support ES6 modules (`import`/`export`) by default.**
+    * **All plugin code and scripts should use CommonJS syntax** for module imports and exports (`require()` and `module.exports`).
+    * **Incorrect Example (ES6):**
+        ```javascript
+        // This will NOT work in Hexo plugins by default
+        import myModule from './my-module.js';
+        export function myFunction() { /* ... */ }
+        ```
+    * **Correct Example (CommonJS):**
+        ```javascript
+        // Use CommonJS syntax
+        const path = require('path');
+        const fs = require('fs');
+
+        hexo.extend.helper.register('my_helper', function() {
+          // ...
+        });
+        ```
+* **Error Handling:** Implement robust error handling in your plugin logic.
+* **Logging:** Use `hexo.log.info()`, `hexo.log.warn()`, `hexo.log.error()` for logging within your plugin.
+* **Clarity and Readability:** Write clean, well-commented code.
+
+## Theme Customization:
+
+* **Avoid Direct Theme Modification:** If you're using a third-party theme, create a custom theme based on it or use Hexo's override mechanism rather than directly modifying theme files, to facilitate updates.
+* **EJS/Pug Templates:** Adhere to the templating language used by the theme (EJS, Pug, etc.) and follow its conventions.
+
+## Example of a common mistake to avoid:
+* **Do not directly write `require()` or `import` statements at the top level of plugin files if they are not explicitly within a function or necessary for global setup.** Hexo handles module loading for its scripts.
+
+## If issues persist, refer to:
+* Hexo Documentation: [https://hexo.io/docs/](mdc:https:/hexo.io/docs)
+* Specific plugin/theme documentation.

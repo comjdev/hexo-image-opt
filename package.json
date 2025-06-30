@@ -1,0 +1,59 @@
+{
+	"name": "hexo-image-opt",
+	"version": "1.0.0",
+	"description": "A comprehensive Hexo plugin for automatic image optimization, WebP conversion, responsive image generation, and HTML enhancement with picture elements",
+	"main": "index.js",
+	"keywords": [
+		"hexo",
+		"hexo-plugin",
+		"image",
+		"optimization",
+		"compression",
+		"webp",
+		"responsive",
+		"picture-element",
+		"sharp",
+		"performance",
+		"seo"
+	],
+	"author": {
+		"name": "Seaspray Pools",
+		"email": "sales@seaspraypools.com.au",
+		"url": "https://seaspraypools.com.au"
+	},
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/seaspraypools/hexo-image-opt.git"
+	},
+	"bugs": {
+		"url": "https://github.com/seaspraypools/hexo-image-opt/issues"
+	},
+	"homepage": "https://github.com/seaspraypools/hexo-image-opt#readme",
+	"dependencies": {
+		"sharp": "^0.33.0",
+		"glob": "^10.3.10",
+		"fs-extra": "^11.2.0",
+		"node-html-parser": "^6.1.12"
+	},
+	"devDependencies": {
+		"eslint": "^8.57.0",
+		"jest": "^29.7.0"
+	},
+	"engines": {
+		"node": ">=14.0.0"
+	},
+	"scripts": {
+		"test": "jest",
+		"lint": "eslint ."
+	},
+	"files": [
+		"index.js",
+		"lib/",
+		"README.md",
+		"LICENSE"
+	],
+	"publishConfig": {
+		"access": "public"
+	}
+}
