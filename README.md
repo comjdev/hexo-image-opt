@@ -1,208 +1,178 @@
-# Hexo Image Optimization Plugin
+# hexo-image-opt
 
-A comprehensive Hexo plugin that automatically optimizes images, converts them to WebP format, generates responsive sizes, and enhances HTML with modern `<picture>` elements for better performance and SEO.
+A powerful Hexo plugin for automatic image optimization and processing. This plugin automatically optimizes images during the Hexo build process, generating multiple formats (WebP, JPEG, PNG, AVIF) and responsive sizes for better performance.
 
-## ✨ Features
+## Features
 
-- **🖼️ Automatic Image Optimization**: Converts images to WebP and JPEG formats with configurable quality
-- **📱 Responsive Images**: Generates multiple sizes (800w, 1200w, 1600w) for responsive design
-- **🎨 HTML Enhancement**: Replaces `<img>` tags with responsive `<picture>` elements
-- **🎯 Background Image Support**: Optimizes inline background images with `image-set()`
-- **⚡ Production Only**: Only runs during `hexo generate`, skipped during development
-- **🏗️ Modular Architecture**: Clean, maintainable code split into focused modules
-- **🔧 Configurable**: Extensive configuration options for quality, formats, and sizes
+- 🚀 **Automatic Optimization**: Processes images during Hexo generation
+- 🖼️ **Multiple Formats**: Generate WebP, JPEG, PNG, and AVIF formats
+- 📱 **Responsive Images**: Create multiple sizes for different screen sizes
+- ⚡ **Performance**: Uses Sharp for fast image processing
+- 🔧 **Configurable**: Customize quality, formats, and sizes
+- 📊 **Logging**: Detailed logging with configurable verbosity
 
-## 📦 Installation
+## Installation
 
 ```bash
-npm install hexo-image-opt
+npm install hexo-image-opt --save
 ```
 
-## ⚙️ Configuration
+## Configuration
 
-Add the following configuration to your Hexo `_config.yml`:
+Add the following configuration to your `_config.yml`:
 
 ```yaml
-# Image Optimization Plugin Configuration
+# Image Optimization Plugin
 image_opt:
   enable: true # Enable/disable the plugin
   quality: 80 # Image quality (1-100)
   formats: ["webp", "jpeg"] # Output formats
-  sizes: [800, 1280, 1920] # Responsive image sizes
-  sourceDirs: ["source"] # Source directories to scan
-  skipExisting: true # Skip already optimized images
+  sizes: [800, 1200, 1600] # Responsive image sizes
+  sourceDir: "source/images" # Source images directory
+  outputDir: "public/images" # Output directory
+  skipExisting: true # Skip existing optimized images
   verbose: false # Enable verbose logging
-  replaceImgTags: true # Replace img tags with picture elements
 ```
 
-### Advanced Configuration
+### Configuration Options
 
-```yaml
-image_opt:
-  enable: true
-  quality: 85
-  formats: ["webp", "jpeg", "png"]
-  sizes: [400, 800, 1200, 1600, 2400]
-  sourceDirs:
-    - "source"
-    - "themes/my-theme/source"
-  skipExisting: true
-  verbose: true
-  replaceImgTags: true
+| Option         | Type    | Default             | Description                                   |
+| -------------- | ------- | ------------------- | --------------------------------------------- |
+| `enable`       | boolean | `true`              | Enable or disable the plugin                  |
+| `quality`      | number  | `80`                | Image quality (1-100)                         |
+| `formats`      | array   | `['webp', 'jpeg']`  | Output formats: `webp`, `jpeg`, `png`, `avif` |
+| `sizes`        | array   | `[800, 1200, 1600]` | Responsive image widths                       |
+| `sourceDir`    | string  | `'source/images'`   | Source images directory                       |
+| `outputDir`    | string  | `'public/images'`   | Output directory                              |
+| `skipExisting` | boolean | `true`              | Skip processing existing optimized images     |
+| `verbose`      | boolean | `false`             | Enable verbose logging                        |
+
+## Usage
+
+### Basic Usage
+
+1. Place your images in the `source/images` directory
+2. Run `hexo generate` or `hexo build`
+3. The plugin will automatically optimize your images
+
+### Example Directory Structure
+
+```
+source/
+  images/
+    hero.jpg
+    gallery/
+      image1.png
+      image2.jpg
 ```
 
-## 🚀 Usage
+After generation, you'll have:
 
-### Basic Setup
+```
+public/
+  images/
+    hero.webp
+    hero.jpeg
+    hero-800w.webp
+    hero-1200w.webp
+    hero-1600w.webp
+    gallery/
+      image1.webp
+      image1.jpeg
+      image1-800w.webp
+      image1-1200w.webp
+      image1-1600w.webp
+      image2.webp
+      image2.jpeg
+      image2-800w.webp
+      image2-1200w.webp
+      image2-1600w.webp
+```
 
-1. **Install the plugin**:
-
-   ```bash
-   npm install hexo-image-opt
-   ```
-
-2. **Add configuration** to your `_config.yml`:
-
-   ```yaml
-   image_opt:
-     enable: true
-   ```
-
-3. **Generate your site**:
-   ```bash
-   hexo generate
-   ```
-
-The plugin will automatically:
-
-- Scan your source directories for images
-- Generate optimized WebP and JPEG versions
-- Create responsive sizes for different screen sizes
-- Replace `<img>` tags with `<picture>` elements
-- Optimize inline background images
-
-### Example Output
-
-**Before** (original HTML):
+### Using Optimized Images in Templates
 
 ```html
-<img src="/images/hero.jpg" alt="Hero Image" class="hero-image" />
-```
-
-**After** (optimized HTML):
-
-```html
+<!-- Responsive image with multiple formats -->
 <picture>
-	<source media="(min-width:800px)" srcset="/images/hero-800w.webp" />
-	<source media="(min-width:1200px)" srcset="/images/hero-1200w.webp" />
-	<source media="(min-width:1600px)" srcset="/images/hero-1600w.webp" />
-	<img src="/images/hero.jpg" alt="Hero Image" class="hero-image" />
+	<source srcset="/images/hero-800w.webp" media="(max-width: 800px)" />
+	<source srcset="/images/hero-1200w.webp" media="(max-width: 1200px)" />
+	<source srcset="/images/hero-1600w.webp" media="(min-width: 1201px)" />
+	<img src="/images/hero.jpeg" alt="Hero Image" loading="lazy" />
 </picture>
 ```
 
-## 📁 Project Structure
+## Advanced Configuration
 
-```
-hexo-image-opt/
-├── index.js                 # Main entry point
-├── lib/
-│   ├── config.js           # Configuration management
-│   ├── logger.js           # Logging utilities
-│   ├── image-processor.js  # Image optimization logic
-│   ├── html-processor.js   # HTML manipulation
-│   └── hooks.js            # Hexo filter hooks
-├── README.md               # Documentation
-├── LICENSE                 # MIT License
-└── package.json           # NPM package configuration
+### Custom Formats
+
+```yaml
+image_opt:
+  formats: ["webp", "avif", "jpeg"] # Generate WebP, AVIF, and JPEG
 ```
 
-## 🔧 Configuration Options
+### Custom Sizes
 
-| Option           | Type    | Default             | Description                            |
-| ---------------- | ------- | ------------------- | -------------------------------------- |
-| `enable`         | boolean | `true`              | Enable/disable the plugin              |
-| `quality`        | number  | `80`                | Image quality (1-100)                  |
-| `formats`        | array   | `["webp", "jpeg"]`  | Output formats                         |
-| `sizes`          | array   | `[800, 1280, 1920]` | Responsive image sizes                 |
-| `sourceDirs`     | array   | `["source"]`        | Source directories to scan             |
-| `skipExisting`   | boolean | `true`              | Skip already optimized images          |
-| `verbose`        | boolean | `false`             | Enable verbose logging                 |
-| `replaceImgTags` | boolean | `true`              | Replace img tags with picture elements |
+```yaml
+image_opt:
+  sizes: [480, 768, 1024, 1440] # Mobile-first responsive sizes
+```
 
-## 🎯 Supported Image Formats
+### High Quality Output
 
-- **Input**: JPG, JPEG, PNG, GIF
-- **Output**: WebP, JPEG, PNG (configurable)
+```yaml
+image_opt:
+  quality: 95
+  formats: ["webp", "avif"]
+```
 
-## 📱 Responsive Image Sizes
+## Performance Tips
 
-The plugin generates multiple image sizes for responsive design:
+1. **Use WebP and AVIF**: These formats provide better compression
+2. **Optimize Quality**: Balance between quality and file size
+3. **Skip Existing**: Keep `skipExisting: true` for faster builds
+4. **Responsive Sizes**: Choose sizes that match your breakpoints
 
-- **800w**: Tablets and small laptops
-- **1200w**: Desktop screens
-- **1600w**: Large screens and high-DPI displays
+## Troubleshooting
 
-## 🔍 How It Works
+### Common Issues
 
-1. **Image Discovery**: Scans configured source directories for images
-2. **Optimization**: Converts images to WebP and JPEG formats using Sharp
-3. **Responsive Generation**: Creates multiple sizes for different screen sizes
-4. **HTML Processing**: Replaces `<img>` tags with `<picture>` elements
-5. **Background Optimization**: Enhances inline background images with `image-set()`
-
-## 🛠️ Development
-
-### Prerequisites
-
-- Node.js >= 14.0.0
-- Hexo >= 5.0.0
-
-### Local Development
-
-1. **Clone the repository**:
+1. **Sharp Installation**: If you encounter Sharp installation issues:
 
    ```bash
-   git clone https://github.com/seaspraypools/hexo-image-opt.git
-   cd hexo-image-opt
+   npm rebuild sharp
    ```
 
-2. **Install dependencies**:
+2. **Memory Issues**: For large images, consider reducing quality or sizes
 
-   ```bash
-   npm install
-   ```
+3. **Build Performance**: Use `skipExisting: true` to avoid reprocessing
 
-3. **Run tests**:
+### Debug Mode
 
-   ```bash
-   npm test
-   ```
+Enable verbose logging to see detailed information:
 
-4. **Lint code**:
-   ```bash
-   npm run lint
-   ```
+```yaml
+image_opt:
+  verbose: true
+```
 
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
+## Contributing
 
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+2. Create a feature branch
+3. Make your changes
+4. Add tests
+5. Submit a pull request
 
-## 📄 License
+## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT License - see [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
+## Changelog
 
-- Built with [Sharp](https://sharp.pixelplumbing.com/) for image processing
-- Uses [node-html-parser](https://github.com/taoqf/node-html-parser) for HTML manipulation
-- Inspired by modern web performance best practices
+### 1.0.0
 
----
-
-Made with ❤️ by [comjdev](https://github.com/comjdev/hexo-image-opt)
+- Initial release
+- Basic image optimization
+- Multiple format support
+- Responsive image generation
+- Configurable options

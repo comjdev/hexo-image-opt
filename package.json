@@ -1,7 +1,7 @@
 {
 	"name": "hexo-image-opt",
 	"version": "1.0.0",
-	"description": "A comprehensive Hexo plugin for automatic image optimization, WebP conversion, responsive image generation, and HTML enhancement with picture elements",
+	"description": "A Hexo plugin for image optimization and processing",
 	"main": "index.js",
 	"keywords": [
 		"hexo",
@@ -10,30 +10,22 @@
 		"optimization",
 		"compression",
 		"webp",
-		"responsive",
-		"picture-element",
-		"sharp",
-		"performance",
-		"seo"
+		"responsive"
 	],
-	"author": {
-		"name": "Christoph Jürgens",
-		"url": "https://github.com/comjdev"
-	},
+	"author": "Your Name",
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/comjdev/hexo-image-opt.git"
+		"url": "https://github.com/yourusername/hexo-image-opt.git"
 	},
 	"bugs": {
-		"url": "https://github.com/comjdev/hexo-image-opt/issues"
+		"url": "https://github.com/yourusername/hexo-image-opt/issues"
 	},
-	"homepage": "https://github.com/comjdev/hexo-image-opt#readme",
+	"homepage": "https://github.com/yourusername/hexo-image-opt#readme",
 	"dependencies": {
 		"sharp": "^0.33.0",
 		"glob": "^10.3.10",
-		"fs-extra": "^11.2.0",
-		"node-html-parser": "^6.1.12"
+		"fs-extra": "^11.2.0"
 	},
 	"devDependencies": {
 		"eslint": "^8.57.0",
@@ -45,14 +37,5 @@
 	"scripts": {
 		"test": "jest",
 		"lint": "eslint ."
-	},
-	"files": [
-		"index.js",
-		"lib/",
-		"README.md",
-		"LICENSE"
-	],
-	"publishConfig": {
-		"access": "public"
 	}
 }

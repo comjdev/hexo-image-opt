@@ -1,21 +1,10 @@
 "use strict";
 /* global hexo */
 
-// Only run in production mode (when hexo generate is called)
-// Skip in development mode (when hexo server is called)
-if (process.argv.includes("server") || process.argv.includes("--draft")) {
-	console.log(
-		"[hexo-image-opt] Skipping in development mode - only runs in production",
-	);
-	return;
-}
-
-// Import modular components
-const Config = require("./lib/config");
-const Logger = require("./lib/logger");
-const ImageGenerator = require("./lib/generator");
-const HtmlProcessor = require("./lib/html-processor");
-const Hooks = require("./lib/hooks");
+const sharp = require("sharp");
+const glob = require("glob");
+const fs = require("fs-extra");
+const path = require("path");
 
 /**
  * Hexo Image Optimization Plugin
@@ -24,35 +13,213 @@ const Hooks = require("./lib/hooks");
 class HexoImageOpt {
 	constructor(hexo) {
 		this.hexo = hexo;
+		this.config = this.getConfig();
+		this.processedImages = new Set();
+		this.log("Plugin constructor called");
+	}
 
-		// Initialize components
-		this.config = new Config(hexo).getConfig();
-		this.logger = new Logger(hexo, this.config);
-		this.imageGenerator = new ImageGenerator(this.config, this.logger);
-		this.htmlProcessor = new HtmlProcessor(this.config, this.logger);
-		this.hooks = new Hooks(
-			hexo,
-			this.imageGenerator,
-			this.htmlProcessor,
-			this.logger,
-		);
+	/**
+	 * Get plugin configuration with defaults
+	 */
+	getConfig() {
+		const defaultConfig = {
+			enable: true,
+			quality: 80,
+			formats: ["webp", "jpeg"],
+			sizes: [800, 1280, 1920],
+			sourceDirs: ["source"],
+			skipExisting: true,
+			verbose: false,
+		};
 
-		this.logger.info("Plugin constructor called");
+		// Check if hexo.config exists and has image_opt
+		const userConfig =
+			this.hexo.config && this.hexo.config.image_opt
+				? this.hexo.config.image_opt
+				: {};
+		const config = { ...defaultConfig, ...userConfig };
+
+		// Add theme images directory if theme is configured
+		if (this.hexo.config && this.hexo.config.theme) {
+			const themeImagesDir = `themes/${this.hexo.config.theme}/source`;
+			if (!config.sourceDirs.includes(themeImagesDir)) {
+				config.sourceDirs.push(themeImagesDir);
+			}
+		}
+
+		this.log(`Configuration loaded: ${JSON.stringify(config)}`);
+		return config;
 	}
 
 	/**
 	 * Initialize the plugin
 	 */
 	init() {
-		this.logger.info("Plugin init() called");
+		this.log("Plugin init() called");
 
 		if (!this.config.enable) {
-			this.logger.info("Plugin disabled in configuration");
+			this.log("Plugin disabled in configuration");
 			return;
 		}
 
-		// Register all hooks
-		this.hooks.register();
+		// Hook into the generation process
+		this.hexo.extend.filter.register(
+			"after_generate",
+			this.afterGenerate.bind(this),
+		);
+
+		this.log(
+			"Hexo Image Optimization Plugin initialized and after_generate hook registered",
+		);
+	}
+
+	/**
+	 * After generation hook
+	 */
+	async afterGenerate() {
+		this.log("after_generate hook called!");
+		try {
+			await this.processImages();
+			this.log(`Processed ${this.processedImages.size} images`);
+		} catch (error) {
+			this.log(`Error in after_generate: ${error.message}`, "error");
+		}
+	}
+
+	/**
+	 * Process images during generation
+	 */
+	async processImages() {
+		try {
+			for (const sourceDir of this.config.sourceDirs) {
+				const imagePattern = path.join(sourceDir, "**/*.{jpg,jpeg,png,gif}");
+				this.log(`Looking for images with pattern: ${imagePattern}`);
+
+				const imageFiles = glob.sync(imagePattern, { nodir: true });
+
+				this.log(
+					`Found ${imageFiles.length} images in ${sourceDir}: ${imageFiles.join(
+						", ",
+					)}`,
+				);
+
+				for (const imagePath of imageFiles) {
+					await this.optimizeImage(imagePath, sourceDir);
+				}
+			}
+
+			this.log("Image optimization completed");
+		} catch (error) {
+			this.log(`Error processing images: ${error.message}`, "error");
+		}
+	}
+
+	/**
+	 * Optimize a single image
+	 */
+	async optimizeImage(imagePath, sourceDir) {
+		try {
+			const relativePath = path.relative(sourceDir, imagePath);
+			const outputBasePath = path.dirname(imagePath);
+			const baseName = path.basename(imagePath, path.extname(imagePath));
+
+			// Create output directory if it doesn't exist
+			await fs.ensureDir(outputBasePath);
+
+			// Process each format
+			for (const format of this.config.formats) {
+				await this.generateFormat(imagePath, outputBasePath, baseName, format);
+			}
+
+			// Generate responsive sizes
+			for (const size of this.config.sizes) {
+				await this.generateResponsive(
+					imagePath,
+					outputBasePath,
+					baseName,
+					size,
+				);
+			}
+
+			this.processedImages.add(imagePath);
+			this.log(`Optimized: ${relativePath}`);
+		} catch (error) {
+			this.log(`Error optimizing ${imagePath}: ${error.message}`, "error");
+		}
+	}
+
+	/**
+	 * Generate image in specific format
+	 */
+	async generateFormat(inputPath, outputPath, baseName, format) {
+		const outputFile = path.join(outputPath, `${baseName}.${format}`);
+
+		if (this.config.skipExisting && (await fs.pathExists(outputFile))) {
+			return;
+		}
+
+		let sharpInstance = sharp(inputPath);
+
+		switch (format) {
+			case "webp":
+				sharpInstance = sharpInstance.webp({ quality: this.config.quality });
+				break;
+			case "jpeg":
+				sharpInstance = sharpInstance.jpeg({ quality: this.config.quality });
+				break;
+			case "png":
+				sharpInstance = sharpInstance.png({ quality: this.config.quality });
+				break;
+			case "avif":
+				sharpInstance = sharpInstance.avif({ quality: this.config.quality });
+				break;
+		}
+
+		await sharpInstance.toFile(outputFile);
+	}
+
+	/**
+	 * Generate responsive image sizes
+	 */
+	async generateResponsive(inputPath, outputPath, baseName, size) {
+		const outputFile = path.join(outputPath, `${baseName}-${size}w.webp`);
+
+		if (this.config.skipExisting && (await fs.pathExists(outputFile))) {
+			return;
+		}
+
+		await sharp(inputPath)
+			.resize(size, null, { withoutEnlargement: true })
+			.webp({ quality: this.config.quality })
+			.toFile(outputFile);
+	}
+
+	/**
+	 * Logging utility
+	 */
+	log(message, level = "info") {
+		// Check if hexo and hexo.log are available
+		if (!this.hexo || !this.hexo.log) {
+			console.log(`[hexo-image-opt] ${message}`);
+			return;
+		}
+
+		// Check if config is available and has verbose setting
+		const shouldLog = (this.config && this.config.verbose) || level === "error";
+
+		if (shouldLog) {
+			const prefix = "[hexo-image-opt]";
+			switch (level) {
+				case "error":
+					this.hexo.log.error(`${prefix} ${message}`);
+					break;
+				case "warn":
+					this.hexo.log.warn(`${prefix} ${message}`);
+					break;
+				default:
+					this.hexo.log.info(`${prefix} ${message}`);
+			}
+		}
 	}
 }
 
