@@ -17,19 +17,18 @@
 		"seo"
 	],
 	"author": {
-		"name": "Seaspray Pools",
-		"email": "sales@seaspraypools.com.au",
-		"url": "https://seaspraypools.com.au"
+		"name": "Christoph Jürgens",
+		"url": "https://github.com/comjdev"
 	},
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/seaspraypools/hexo-image-opt.git"
+		"url": "https://github.com/comjdev/hexo-image-opt.git"
 	},
 	"bugs": {
-		"url": "https://github.com/seaspraypools/hexo-image-opt/issues"
+		"url": "https://github.com/comjdev/hexo-image-opt/issues"
 	},
-	"homepage": "https://github.com/seaspraypools/hexo-image-opt#readme",
+	"homepage": "https://github.com/comjdev/hexo-image-opt#readme",
 	"dependencies": {
 		"sharp": "^0.33.0",
 		"glob": "^10.3.10",

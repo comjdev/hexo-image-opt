@@ -203,12 +203,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Uses [node-html-parser](https://github.com/taoqf/node-html-parser) for HTML manipulation
 - Inspired by modern web performance best practices
 
-## 📞 Support
-
-- **Issues**: [GitHub Issues](https://github.com/seaspraypools/hexo-image-opt/issues)
-- **Email**: sales@seaspraypools.com.au
-- **Website**: [Seaspray Pools](https://seaspraypools.com.au)
-
 ---
 
-Made with ❤️ by [Seaspray Pools](https://seaspraypools.com.au)
+Made with ❤️ by [comjdev](https://github.com/comjdev/hexo-image-opt)

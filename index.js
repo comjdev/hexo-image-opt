@@ -13,7 +13,7 @@ if (process.argv.includes("server") || process.argv.includes("--draft")) {
 // Import modular components
 const Config = require("./lib/config");
 const Logger = require("./lib/logger");
-const ImageProcessor = require("./lib/image-processor");
+const ImageGenerator = require("./lib/generator");
 const HtmlProcessor = require("./lib/html-processor");
 const Hooks = require("./lib/hooks");
 
@@ -28,11 +28,11 @@ class HexoImageOpt {
 		// Initialize components
 		this.config = new Config(hexo).getConfig();
 		this.logger = new Logger(hexo, this.config);
-		this.imageProcessor = new ImageProcessor(this.config, this.logger);
+		this.imageGenerator = new ImageGenerator(this.config, this.logger);
 		this.htmlProcessor = new HtmlProcessor(this.config, this.logger);
 		this.hooks = new Hooks(
 			hexo,
-			this.imageProcessor,
+			this.imageGenerator,
 			this.htmlProcessor,
 			this.logger,
 		);
