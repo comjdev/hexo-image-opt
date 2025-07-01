@@ -1,6 +1,6 @@
 {
 	"name": "hexo-image-opt",
-	"version": "1.1.1",
+	"version": "1.1.2",
 	"description": "A Hexo plugin for automatic image optimization with WebP support and responsive picture elements",
 	"main": "index.js",
 	"keywords": [
@@ -25,8 +25,7 @@
 	"dependencies": {
 		"sharp": "^0.33.0",
 		"glob": "^10.3.10",
-		"fs-extra": "^11.2.0",
-		"node-html-parser": "^6.1.12"
+		"fs-extra": "^11.2.0"
 	},
 	"devDependencies": {
 		"eslint": "^8.57.0",
