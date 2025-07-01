@@ -1,15 +1,14 @@
 # hexo-image-opt
 
-A powerful Hexo plugin for automatic image optimization and processing. This plugin automatically optimizes images during the Hexo build process, generating multiple formats (WebP, JPEG, PNG, AVIF) and responsive sizes for better performance.
+A Hexo plugin for automatic image optimization and responsive images with WebP support.
 
-## Features
+## Overview
 
-- 🚀 **Automatic Optimization**: Processes images during Hexo generation
-- 🖼️ **Multiple Formats**: Generate WebP, JPEG, PNG, and AVIF formats
-- 📱 **Responsive Images**: Create multiple sizes for different screen sizes
-- ⚡ **Performance**: Uses Sharp for fast image processing
-- 🔧 **Configurable**: Customize quality, formats, and sizes
-- 📊 **Logging**: Detailed logging with configurable verbosity
+This plugin automatically optimizes your images and generates responsive `<picture>` elements for better performance and browser compatibility. It creates:
+
+- **ONE optimized fallback** per image (original format, compressed)
+- **WebP versions** for all responsive sizes (400w, 800w, 1200w, 1600w)
+- **Responsive `<picture>` elements** that use WebP for modern browsers and fallback for older browsers
 
 ## Installation
 
@@ -17,162 +16,131 @@ A powerful Hexo plugin for automatic image optimization and processing. This plu
 npm install hexo-image-opt --save
 ```
 
-## Configuration
-
-Add the following configuration to your `_config.yml`:
-
-```yaml
-# Image Optimization Plugin
-image_opt:
-  enable: true # Enable/disable the plugin
-  quality: 80 # Image quality (1-100)
-  formats: ["webp", "jpeg"] # Output formats
-  sizes: [800, 1200, 1600] # Responsive image sizes
-  sourceDir: "source/images" # Source images directory
-  outputDir: "public/images" # Output directory
-  skipExisting: true # Skip existing optimized images
-  verbose: false # Enable verbose logging
-```
-
-### Configuration Options
-
-| Option         | Type    | Default             | Description                                   |
-| -------------- | ------- | ------------------- | --------------------------------------------- |
-| `enable`       | boolean | `true`              | Enable or disable the plugin                  |
-| `quality`      | number  | `80`                | Image quality (1-100)                         |
-| `formats`      | array   | `['webp', 'jpeg']`  | Output formats: `webp`, `jpeg`, `png`, `avif` |
-| `sizes`        | array   | `[800, 1200, 1600]` | Responsive image widths                       |
-| `sourceDir`    | string  | `'source/images'`   | Source images directory                       |
-| `outputDir`    | string  | `'public/images'`   | Output directory                              |
-| `skipExisting` | boolean | `true`              | Skip processing existing optimized images     |
-| `verbose`      | boolean | `false`             | Enable verbose logging                        |
-
 ## Usage
 
-### Basic Usage
+Just install the plugin and run:
 
-1. Place your images in the `source/images` directory
-2. Run `hexo generate` or `hexo build`
-3. The plugin will automatically optimize your images
-
-### Example Directory Structure
-
-```
-source/
-  images/
-    hero.jpg
-    gallery/
-      image1.png
-      image2.jpg
+```bash
+hexo generate
 ```
 
-After generation, you'll have:
+The plugin will:
 
-```
-public/
-  images/
-    hero.webp
-    hero.jpeg
-    hero-800w.webp
-    hero-1200w.webp
-    hero-1600w.webp
-    gallery/
-      image1.webp
-      image1.jpeg
-      image1-800w.webp
-      image1-1200w.webp
-      image1-1600w.webp
-      image2.webp
-      image2.jpeg
-      image2-800w.webp
-      image2-1200w.webp
-      image2-1600w.webp
+1. Find all images in your `source/` and theme directories
+2. Generate optimized images in `source/opt-images/`
+3. Replace `<img>` tags with responsive `<picture>` elements in generated HTML
+
+## Configuration
+
+Add your configuration under `image_opt` in your Hexo `_config.yml`:
+
+```yaml
+image_opt:
+  quality: 80
+  sizes: [400, 800, 1280, 1920]
+  skipExisting: true
 ```
 
-### Using Optimized Images in Templates
+### Options
+
+- `quality`: Image quality for optimization (default: 80)
+- `sizes`: Responsive widths for WebP generation (default: [400, 800, 1280, 1920])
+- `skipExisting`: Skip processing if optimized images already exist (default: true)
+
+## Features
+
+### 🎯 **Efficient Image Generation**
+
+- **One optimized fallback** per image (original format, compressed)
+- **WebP versions** for all responsive sizes
+- **No duplicate formats** - only what you need
+
+### 🖼️ **Responsive Picture Elements**
+
+- Automatically replaces `<img>` tags with `<picture>` elements
+- **WebP sources** for modern browsers
+- **Optimized fallback** for older browsers
+- **CSS classes preserved** on the `<picture>` element
+
+### 🔍 **Smart Image Discovery**
+
+- Scans `source/` directory for site images
+- **Auto-detects theme directory** (works with any theme name)
+- Excludes `opt-images/` to prevent recursion
+- Supports JPG, JPEG, PNG, and WebP formats
+
+### 🧹 **Clean Source Environment**
+
+- Optimized images stored in dedicated `source/opt-images/` folder
+- Original images remain untouched
+- Clean separation between source and optimized assets
+
+## Generated HTML Structure
+
+The plugin transforms:
 
 ```html
-<!-- Responsive image with multiple formats -->
-<picture>
-	<source srcset="/images/hero-800w.webp" media="(max-width: 800px)" />
-	<source srcset="/images/hero-1200w.webp" media="(max-width: 1200px)" />
-	<source srcset="/images/hero-1600w.webp" media="(min-width: 1201px)" />
-	<img src="/images/hero.jpeg" alt="Hero Image" loading="lazy" />
+<img src="images/my-image.jpg" class="w-full h-48" alt="My Image" />
+```
+
+Into:
+
+```html
+<picture data-optimized="true" class="w-full h-48">
+	<source
+		type="image/webp"
+		srcset="
+			opt-images/my-image-400w.webp   400w,
+			opt-images/my-image-800w.webp   800w,
+			opt-images/my-image-1200w.webp 1200w,
+			opt-images/my-image-1600w.webp 1600w
+		"
+	/>
+	<img src="opt-images/my-image-optimized.jpg" alt="My Image" />
 </picture>
 ```
 
-## Advanced Configuration
+## File Naming Convention
 
-### Custom Formats
+Generated files follow this pattern:
 
-```yaml
-image_opt:
-  formats: ["webp", "avif", "jpeg"] # Generate WebP, AVIF, and JPEG
+- **Fallback**: `{basename}-optimized.{original-extension}`
+- **WebP sizes**: `{basename}-{size}w.webp`
+
+Examples:
+
+- `hero-pool-optimized.jpg` (fallback)
+- `hero-pool-400w.webp`, `hero-pool-800w.webp`, etc. (WebP sizes)
+
+## Browser Support
+
+- **Modern browsers**: Use WebP for smaller file sizes
+- **Older browsers**: Fall back to optimized JPEG/PNG
+- **Universal compatibility**: Works everywhere
+
+## Performance Benefits
+
+- **Smaller file sizes**: WebP is 25-35% smaller than JPEG
+- **Responsive loading**: Browser downloads only the size it needs
+- **Better Core Web Vitals**: Faster loading and better user experience
+- **Reduced bandwidth**: Especially beneficial for mobile users
+
+## Development Workflow
+
+1. **Add images** to your `source/` or theme directories
+2. **Run `hexo generate`** - plugin automatically optimizes and creates responsive HTML
+3. **Deploy** - optimized images and responsive HTML are ready
+
+## Clean Command
+
+The plugin integrates with Hexo's clean command:
+
+```bash
+hexo clean
 ```
 
-### Custom Sizes
-
-```yaml
-image_opt:
-  sizes: [480, 768, 1024, 1440] # Mobile-first responsive sizes
-```
-
-### High Quality Output
-
-```yaml
-image_opt:
-  quality: 95
-  formats: ["webp", "avif"]
-```
-
-## Performance Tips
-
-1. **Use WebP and AVIF**: These formats provide better compression
-2. **Optimize Quality**: Balance between quality and file size
-3. **Skip Existing**: Keep `skipExisting: true` for faster builds
-4. **Responsive Sizes**: Choose sizes that match your breakpoints
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Sharp Installation**: If you encounter Sharp installation issues:
-
-   ```bash
-   npm rebuild sharp
-   ```
-
-2. **Memory Issues**: For large images, consider reducing quality or sizes
-
-3. **Build Performance**: Use `skipExisting: true` to avoid reprocessing
-
-### Debug Mode
-
-Enable verbose logging to see detailed information:
-
-```yaml
-image_opt:
-  verbose: true
-```
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Submit a pull request
+This removes all optimized images from `source/opt-images/` to keep your source environment clean.
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) file for details.
-
-## Changelog
-
-### 1.0.0
-
-- Initial release
-- Basic image optimization
-- Multiple format support
-- Responsive image generation
-- Configurable options
+MIT
