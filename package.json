@@ -12,16 +12,16 @@
 		"webp",
 		"responsive"
 	],
-	"author": "Your Name",
+	"author": "Christoph Jürgens",
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/yourusername/hexo-image-opt.git"
+		"url": "https://github.com/comjdev/hexo-image-opt.git"
 	},
 	"bugs": {
-		"url": "https://github.com/yourusername/hexo-image-opt/issues"
+		"url": "https://github.com/comjdev/hexo-image-opt/issues"
 	},
-	"homepage": "https://github.com/yourusername/hexo-image-opt#readme",
+	"homepage": "https://github.com/comjdev/hexo-image-opt#readme",
 	"dependencies": {
 		"sharp": "^0.33.0",
 		"glob": "^10.3.10",
